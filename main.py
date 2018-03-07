@@ -23,7 +23,7 @@ def standings():
         placement += 1
 
 class Shell(cmd.Cmd):
-    intro = "Commands: addplayer, report, standings, write, quit"
+    intro = "Commands:\n\taddplayer <tag>\n\treport <tag1> <tag2> <score>\n\tstandings\n\twrite\n\tquit\nFor more information about usage, see the help of the subcommands of this application."
     prompt = "> "
 
     def do_addplayer(self, arg):
@@ -64,8 +64,9 @@ def command_shell(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.set_defaults(func=command_shell)
-    subparsers = parser.add_subparsers()
+    parser.set_defaults(func=None)
+    subparsers = parser.add_subparsers(dest="command")
+    subparsers.required = True
 
     parser_addplayer = subparsers.add_parser("addplayer", help="Add a new player")
     parser_addplayer.add_argument("tag", help="The tag of the player")
