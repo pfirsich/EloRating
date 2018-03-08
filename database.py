@@ -1,4 +1,5 @@
 import json
+import re
 import time
 
 import elo as rating
@@ -39,7 +40,7 @@ class MalformedScoreStringError(DBError):
 # Only supports "win-loss", e.g. "3-0", "1-2" => no draws! (like "1-1-1")
 class Score(object):
     def __init__(self, score_str):
-        m = re.match(r"([0-9]+)-([0-9]+)", score_str)
+        m = re.match(r"^([0-9]+)-([0-9]+)$", score_str)
         if m:
             self.wins = int(m.group(1))
             self.losses = int(m.group(2))
