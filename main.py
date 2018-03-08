@@ -71,12 +71,14 @@ def command_reportcsv(args):
 
         with open(args.file, "r") as inFile:
             for line in inFile:
+                print(">", line.strip())
                 parts = map(lambda s: s.strip(), line.split())
                 tag1, tag2, score = tuple(parts)
                 if not report(tag1, tag2, score):
                     unreported.append(line)
+                print()
 
-        print("\nThe following matches have not been reported (errors occured). Please report them manually.")
+        print("\n>>> The following matches have not been reported (errors occured). Please report them manually.")
         for match in unreported:
             print(match.strip())
     except IOError as err:
