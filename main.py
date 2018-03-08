@@ -18,7 +18,11 @@ def report(tag1, tag2, score):
         return
     rating1, rating2 = player1.rating.copy(), player2.rating.copy()
     print("Rating before the match:\n{}: {}\n{}: {}".format(player1.tag, rating1, player2.tag, rating2))
-    db.report(player1, player2, score)
+    try:
+        db.report(player1, player2, score)
+    except db.MalformedScoreStringError as err:
+        print("Malformed score string '{}'. Please pass a string of the form 'X-Y' (X, Y integers)".format(score))
+        return
     print("Rating after the match:\n{}: {} ({})\n{}: {} ({})".format(\
         player1.tag, player1.rating, player1.rating.delta_str(rating1),\
         player2.tag, player2.rating, player2.rating.delta_str(rating2)))

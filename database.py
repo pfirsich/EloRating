@@ -30,16 +30,27 @@ class RatingSystemMismatchError(DBError):
         self.file_rating_system = file
         self.expected_rating_system = expected
 
+# Not sure if this belongs here
+class MalformedScoreStringError(DBError):
+    def __init__(self, score_str):
+        super().__init__("Malformed score string '{}'".format(score_str))
+        self.score_str = score_str
+
 # Only supports "win-loss", e.g. "3-0", "1-2" => no draws! (like "1-1-1")
 class Score(object):
     def __init__(self, score_str):
-        # Make this thing throw exceptions if the score string is malformed
-        parts = tuple(map(int, score_str.split("-")))
-        self.wins = parts[0]
-        self.losses = parts[1]
+        m = re.match(r"([0-9]+)-([0-9]+)", score_str)
+        if m:
+            self.wins = int(m.group(1))
+            self.losses = int(m.group(2))
+        else:
+            raise MalformedScoreStringError(score_str)
+
+    def game_count(self):
+        return self.wins + self.losses
 
     def __str__(self):
-        return str(self.wins) + "-" + str(self.losses)
+        return "{}-{}".format(self.wins, self.losses)
 
 class Player(object):
     def __init__(self, player_id, tag, rating):
