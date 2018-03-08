@@ -118,7 +118,7 @@ def get_player_by_id(player_id):
 def get_player_by_tag(tag):
     # TODO: add acceleration structures to speed this up (a dictionary)
     for player in players:
-        if player.tag == tag:
+        if player.tag.lower() == tag.lower():
             return player
     else:
         raise UnknownPlayerTagError(tag)
