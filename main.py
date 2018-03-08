@@ -4,11 +4,18 @@ import argparse
 import database as db
 
 def addplayer(tag):
-    player = db.addplayer(tag)
-    print("Added player '{}' (id: {})\nCurrent (starting) rating: {}".format(player.tag, player.id, player.rating))
+    try:
+        player = db.addplayer(tag)
+        print("Added player '{}' (id: {})\nCurrent (starting) rating: {}".format(player.tag, player.id, player.rating))
+    except db.PlayerTagAlreadyExists as err:
+        print("A player with that tag already exists!")
 
 def report(tag1, tag2, score):
-    player1, player2 = db.get_player_by_tag(tag1), db.get_player_by_tag(tag2)
+    try:
+        player1, player2 = db.get_player_by_tag(tag1), db.get_player_by_tag(tag2)
+    except db.UnknownPlayerTagError as err:
+        print("Unknown player tag:", err.tag)
+        return
     rating1, rating2 = player1.rating.copy(), player2.rating.copy()
     print("Rating before the match:\n{}: {}\n{}: {}".format(player1.tag, rating1, player2.tag, rating2))
     db.report(player1, player2, score)
@@ -85,4 +92,7 @@ if __name__ == '__main__':
     parser_shell.set_defaults(func=command_shell)
 
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except db.DBError as err:
+        print("An error occured!:", err)

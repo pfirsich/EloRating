@@ -33,6 +33,7 @@ class RatingSystemMismatchError(DBError):
 # Only supports "win-loss", e.g. "3-0", "1-2" => no draws! (like "1-1-1")
 class Score(object):
     def __init__(self, score_str):
+        # Make this thing throw exceptions if the score string is malformed
         parts = tuple(map(int, score_str.split("-")))
         self.wins = parts[0]
         self.losses = parts[1]
