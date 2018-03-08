@@ -38,11 +38,16 @@ class Rating(object):
         return c
 
 def update_rating(player1, player2, score):
-    game_count = score.wins + score.losses
     # Terminology like here: https://de.wikipedia.org/wiki/Elo-Zahl
+    # delta = k * (S_A - E_A * game_count)
+    # E_B = 1 - E_A
+    # S_B = game_count - S_A
+    # => k * (S_B - E_B * game_count) = k * (game_count - S_A - (1 - E_A) * game_count)
+    # = k * (game_count - game_count - S_A + E_A * game_count)
+    # = k * -(S_A - E_A * game_count) = -delta
     E_A = expected(player1.rating.score, player2.rating.score)
     S_A = score.wins
-    player1.rating.score += math.floor(K_FACTOR * (S_A - E_A * game_count) + 0.5)
-    E_B = 1 - E_A
-    S_B = score.losses
-    player2.rating.score += math.floor(K_FACTOR * (S_B - E_B * game_count) + 0.5)
+    # round delta to nearest integer
+    delta = math.floor(K_FACTOR * (S_A - E_A * score.game_count()) + 0.5)
+    player1.rating.score += delta
+    player2.rating.score -= delta
