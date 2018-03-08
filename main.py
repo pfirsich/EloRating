@@ -15,17 +15,18 @@ def report(tag1, tag2, score):
         player1, player2 = db.get_player_by_tag(tag1), db.get_player_by_tag(tag2)
     except db.UnknownPlayerTagError as err:
         print("Unknown player tag:", err.tag)
-        return
+        return False
     rating1, rating2 = player1.rating.copy(), player2.rating.copy()
     print("Rating before the match:\n{}: {}\n{}: {}".format(player1.tag, rating1, player2.tag, rating2))
     try:
         db.report(player1, player2, score)
     except db.MalformedScoreStringError as err:
         print("Malformed score string '{}'. Please pass a string of the form 'X-Y' (X, Y integers)".format(score))
-        return
+        return False
     print("Rating after the match:\n{}: {} ({})\n{}: {} ({})".format(\
         player1.tag, player1.rating, player1.rating.delta_str(rating1),\
         player2.tag, player2.rating, player2.rating.delta_str(rating2)))
+    return True
 
 def standings():
     placement = 1
@@ -63,6 +64,26 @@ def command_report(args):
     report(args.tag1.strip(), args.tag2.strip(), args.score)
     db.write()
 
+def command_reportcsv(args):
+    db.read()
+    try:
+        unreported = []
+
+        with open(args.file, "r") as inFile:
+            for line in inFile:
+                parts = map(lambda s: s.strip(), line.split())
+                tag1, tag2, score = tuple(parts)
+                if not report(tag1, tag2, score):
+                    unreported.append(line)
+
+        print("\nThe following matches have not been reported (errors occured). Please report them manually.")
+        for match in unreported:
+            print(match.strip())
+    except IOError as err:
+        print("Error opening file!:", err)
+        return
+    db.write()
+
 def command_standings(args):
     db.read()
     standings()
@@ -88,6 +109,10 @@ if __name__ == '__main__':
     parser_report.add_argument("tag2", help="Tag of the second player")
     parser_report.add_argument("score", help="Score, e.g. '3-0' or '1-2'")
     parser_report.set_defaults(func=command_report)
+
+    parser_reportcsv = subparsers.add_parser("reportcsv", help="Report a number of matches using a csv file. Each line is a match of the form: 'tag1 tag2 score'")
+    parser_reportcsv.add_argument("file", help="The csv file")
+    parser_reportcsv.set_defaults(func=command_reportcsv)
 
     parser_standings = subparsers.add_parser("standings", help="List the current standings")
     parser_standings.set_defaults(func=command_standings)
